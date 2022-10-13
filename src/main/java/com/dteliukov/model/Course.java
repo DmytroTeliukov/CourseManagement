@@ -1,4 +1,4 @@
-package model;
+package com.dteliukov.model;
 
 import java.util.List;
 

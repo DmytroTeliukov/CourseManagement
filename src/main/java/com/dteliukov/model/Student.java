@@ -1,4 +1,4 @@
-package model;
+package com.dteliukov.model;
 
 public class Student {
     private String lastname;

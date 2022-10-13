@@ -1,4 +1,4 @@
-package model;
+package com.dteliukov.model;
 
 public class Answer {
     private Student student;

@@ -1,4 +1,4 @@
-package model;
+package com.dteliukov.model;
 
 public class AuthorizedUser {
     private String email;
