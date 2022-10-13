@@ -3,8 +3,6 @@ package com.dteliukov.model;
 import java.util.List;
 
 public class Course {
+    private String name;
     private Teacher teacher;
-    private List<Group> groups;
-    private List<Material> materials;
-    private List<Task> tasks;
 }

@@ -1,4 +1,4 @@
-package com.dteliukov.model;
+package com.dteliukov.enums;
 
 public enum Role {
     ADMIN, TEACHER, STUDENT
