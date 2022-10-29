@@ -1,5 +1,7 @@
 package com.dteliukov.enums;
 
+import java.util.Arrays;
+
 public enum ECTS {
     F(1),
     FX(35),
@@ -12,5 +14,12 @@ public enum ECTS {
 
     ECTS(int minRangeMark) {
         this.minRangeMark = minRangeMark;
+    }
+
+    public ECTS getECTSMark(int mark) {
+        return Arrays.stream(values())
+                .filter(ects -> ects.minRangeMark <= mark)
+                .findFirst()
+                .orElseThrow();
     }
 }

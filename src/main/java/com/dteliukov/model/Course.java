@@ -1,8 +1,8 @@
 package com.dteliukov.model;
 
-import java.util.List;
 
 public class Course {
-    private String name;
+    private Long id;
     private Teacher teacher;
+    private String name;
 }

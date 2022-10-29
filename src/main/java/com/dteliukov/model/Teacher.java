@@ -1,6 +1,7 @@
 package com.dteliukov.model;
 
 public class Teacher {
+    private Integer idTeacher;
     private String lastname;
     private String firstname;
     private String patronymic;

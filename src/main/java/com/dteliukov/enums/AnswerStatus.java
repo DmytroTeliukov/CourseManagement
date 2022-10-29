@@ -1,5 +1,5 @@
 package com.dteliukov.enums;
 
-public enum Status {
+public enum AnswerStatus {
     UNSENT, WAITING, CHECKED
 }
