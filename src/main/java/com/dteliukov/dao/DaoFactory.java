@@ -3,7 +3,7 @@ package com.dteliukov.dao;
 import com.dteliukov.dao.mongodb.MongoDBDaoRepository;
 import com.dteliukov.dao.mysql.MySqlDaoRepository;
 
-public class DaoManager {
+public class DaoFactory {
     private static DaoRepository repository = null;
     public static DaoRepository getRepository(TypeDao type) {
         if (repository == null) {
