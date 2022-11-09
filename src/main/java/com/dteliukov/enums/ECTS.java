@@ -16,7 +16,7 @@ public enum ECTS {
         this.minRangeMark = minRangeMark;
     }
 
-    public ECTS getECTSMark(int mark) {
+    public static ECTS getECTSMark(int mark) {
         return Arrays.stream(values())
                 .filter(ects -> ects.minRangeMark <= mark)
                 .findFirst()
