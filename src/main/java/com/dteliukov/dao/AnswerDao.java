@@ -7,10 +7,9 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface AnswerDao {
-    void addAnswer(Answer answer);
+    void addAnswer(Answer answer, Long taskId);
     void editAnswer(Answer answer);
     void deleteAnswer(Long id);
-    Collection<Answer> retrieveAnswersByTask(Task task);
+    Collection<Answer> retrieveByTask(Long id);
     Optional<Answer> get(Long id);
-    Optional<Answer> searchByStudentEmail(String email);
 }
