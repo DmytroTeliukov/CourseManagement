@@ -19,8 +19,8 @@ public class UserServiceProxy implements UserService {
     }
 
     @Override
-    public void registry(User user) {
-        this.service.registry(user);
+    public void register(User user) {
+        this.service.register(user);
     }
 
     @Override

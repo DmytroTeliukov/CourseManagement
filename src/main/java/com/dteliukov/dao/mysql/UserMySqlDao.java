@@ -51,7 +51,7 @@ public class UserMySqlDao implements UserDao {
     }
 
     @Override
-    public void registryUser(User user) {
+    public void registerUser(User user) {
         String createUserScript = createUserScript();
         logger.info("Registry user sql script: " + createUserScript);
         try (Connection connection = MySqlConnection.getConnection()) {

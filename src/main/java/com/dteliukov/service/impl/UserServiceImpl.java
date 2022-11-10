@@ -7,7 +7,7 @@ import com.dteliukov.service.UserService;
 
 public class UserServiceImpl implements UserService {
     @Override
-    public void registry(User user) {
+    public void register(User user) {
 
     }
 

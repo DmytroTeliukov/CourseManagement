@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface UserDao {
     Optional<AuthorizedUser> login(UnauthorizedUser user);
-    void registryUser(User user);
+    void registerUser(User user);
     void editUser(User user);
     void deleteUser(String email);
     Collection<User> retrieveUsers();

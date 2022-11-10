@@ -6,7 +6,7 @@ import com.dteliukov.model.UnauthorizedUser;
 import com.dteliukov.model.User;
 
 public interface UserService {
-    void registry(User user);
+    void register(User user);
     AuthorizedUser login(UnauthorizedUser user);
     void editProfile(User user) throws AccessDeniedException;
     void deleteProfile(String email) throws AccessDeniedException;

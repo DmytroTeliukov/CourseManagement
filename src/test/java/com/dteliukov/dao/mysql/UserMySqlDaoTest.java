@@ -1,7 +1,7 @@
 package com.dteliukov.dao.mysql;
 
 import com.dteliukov.dao.DaoRepository;
-import com.dteliukov.dao.DaoManager;
+import com.dteliukov.dao.DaoFactory;
 import com.dteliukov.dao.TypeDao;
 import com.dteliukov.dao.UserDao;
 import com.dteliukov.enums.Role;
@@ -20,12 +20,12 @@ class UserMySqlDaoTest {
 
     @BeforeAll
     static void setUpUserDaoTest() {
-        DaoRepository repository = DaoManager.getRepository(TypeDao.MYSQL);
+        DaoRepository repository = DaoFactory.getRepository(TypeDao.MYSQL);
         dao = Objects.requireNonNull(repository).getUserDao();
         prototypeUser = new User("testLastname", "testFirstname",
                 "teststudent@gmail", "user", Role.STUDENT);
 
-        dao.registryUser(prototypeUser);
+        dao.registerUser(prototypeUser);
     }
 
     @Test
