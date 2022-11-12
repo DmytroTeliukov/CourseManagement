@@ -1,7 +1,7 @@
 package com.dteliukov.dao.mysql;
 
 import com.dteliukov.dao.UserDao;
-import com.dteliukov.dao.mysql.tables.UserTable;
+import com.dteliukov.dao.schema.Columns;
 import com.dteliukov.enums.Role;
 import com.dteliukov.model.*;
 import com.dteliukov.security.SecurityPasswordUtil;
@@ -27,8 +27,8 @@ public class UserMySqlDao implements UserDao {
                 logger.info("Authorize user: " + user);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        String role = resultSet.getString(UserTable.ROLE.name());
-                        String password = resultSet.getString(UserTable.PASSWORD.name());
+                        String role = resultSet.getString(Columns.role);
+                        String password = resultSet.getString(Columns.password);
                         if (SecurityPasswordUtil.verifyPassword(user.password(), password)) {
                             AuthorizedUser authorizedUser = new AuthorizedUser(user.email(), Role.getRole(role));
                             logger.info("Found user: " + authorizedUser);
@@ -62,6 +62,7 @@ public class UserMySqlDao implements UserDao {
                 preparedStatement.setString(4, SecurityPasswordUtil.getSecuredPassword(user.getPassword()));
                 preparedStatement.setString(5, user.getRole().name());
                 preparedStatement.executeUpdate();
+                logger.info("User inserted into database: " + user);
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -79,7 +80,7 @@ public class UserMySqlDao implements UserDao {
             preparedStatement.setString(3, user.getPassword());
             preparedStatement.setString(4, user.getEmail());
             preparedStatement.executeUpdate();
-            logger.info("User is updated!");
+            logger.info("Updated user inserted into database: " + user);
         } catch (SQLException e) {
             logger.error(e.getMessage());
         }
@@ -112,10 +113,11 @@ public class UserMySqlDao implements UserDao {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         User prototypeBuilderUser = new User()
-                                .lastname(resultSet.getString(UserTable.LASTNAME.name()))
-                                .firstname(resultSet.getString(UserTable.FIRSTNAME.name()))
-                                .email(resultSet.getString(UserTable.EMAIL.name()))
-                                .role(Role.getRole(resultSet.getString(UserTable.ROLE.name())));
+                                .lastname(resultSet.getString(Columns.lastname))
+                                .firstname(resultSet.getString(Columns.firstname))
+                                .email(resultSet.getString(Columns.email))
+                                .role(Role.getRole(resultSet.getString(Columns.role)));
+                        logger.info("Get user: " + prototypeBuilderUser);
                         collection.add(prototypeBuilderUser.clone());
                     }
                 }
@@ -137,12 +139,12 @@ public class UserMySqlDao implements UserDao {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
                         User prototypeBuilderUser = new User()
-                                .lastname(resultSet.getString(UserTable.LASTNAME.name()))
-                                .firstname(resultSet.getString(UserTable.FIRSTNAME.name()))
+                                .lastname(resultSet.getString(Columns.lastname))
+                                .firstname(resultSet.getString(Columns.firstname))
                                 .email(email)
-                                .password(resultSet.getString(UserTable.PASSWORD.name()))
-                                .role(Role.getRole(resultSet.getString(UserTable.ROLE.name())));
-                        logger.info("Get user profile : " + prototypeBuilderUser.toString());
+                                .password(resultSet.getString(Columns.password))
+                                .role(Role.getRole(resultSet.getString(Columns.role)));
+                        logger.info("Get user profile : " + prototypeBuilderUser);
                         return Optional.of(prototypeBuilderUser.clone());
                     }
                 }
@@ -161,8 +163,6 @@ public class UserMySqlDao implements UserDao {
     private String createUserScript() {
         return "insert into `user`(lastname, firstname, email, password, role) values(?,?,?,?,?);";
     }
-
-
 
     private String editUserScript() {
         return "update `user` set lastname = ?, firstname = ?, password = ? where email = ?";

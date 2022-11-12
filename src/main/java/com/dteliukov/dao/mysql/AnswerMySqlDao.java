@@ -1,7 +1,7 @@
 package com.dteliukov.dao.mysql;
 
 import com.dteliukov.dao.AnswerDao;
-import com.dteliukov.dao.mysql.tables.*;
+import com.dteliukov.dao.schema.Columns;
 import com.dteliukov.enums.AnswerStatus;
 import com.dteliukov.model.Answer;
 import com.dteliukov.model.User;
@@ -35,7 +35,7 @@ public class AnswerMySqlDao implements AnswerDao {
                 preparedStatement.setLong(8, studentId);
                 preparedStatement.setLong(9, statusId);
                 preparedStatement.executeUpdate();
-                logger.info("Answer saved");
+                logger.info("Answer inserted into database: " + answer);
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -58,7 +58,7 @@ public class AnswerMySqlDao implements AnswerDao {
                 preparedStatement.setLong(6, statusId);
                 preparedStatement.setLong(7, answer.getId());
                 preparedStatement.executeUpdate();
-                logger.info("Answer updated");
+                logger.info("Updated answer inserted into database: " + answer);
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -93,15 +93,15 @@ public class AnswerMySqlDao implements AnswerDao {
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         Answer answer = new Answer()
-                                .id(resultSet.getLong(AnswerTable.ID.name()))
-                                .filePath(resultSet.getString(AnswerTable.PATH.name()))
-                                .mark(resultSet.getInt(AnswerTable.MARK.name()))
-                                .ectsMark(resultSet.getString(AnswerTable.ECTS.name()))
-                                .sent(resultSet.getString(AnswerTable.SENT.name()))
-                                .checked(resultSet.getString(AnswerTable.CHECKED.name()))
-                                .comment(resultSet.getString(AnswerTable.COMMENT.name()))
-                                .student(getUserById(resultSet.getLong(AnswerTable.USER_ID.name()), connection))
-                                .status(AnswerStatus.valueOf(resultSet.getString(AnswerTable.NAME.name())));
+                                .id(resultSet.getLong(Columns.id))
+                                .filePath(resultSet.getString(Columns.path))
+                                .mark(resultSet.getInt(Columns.mark))
+                                .ectsMark(resultSet.getString(Columns.ects))
+                                .sent(resultSet.getString(Columns.sent))
+                                .checked(resultSet.getString(Columns.checked))
+                                .comment(resultSet.getString(Columns.comment))
+                                .student(getUserById(resultSet.getLong(Columns.user_id), connection))
+                                .status(AnswerStatus.valueOf(resultSet.getString(Columns.name)));
                         logger.info("Got answer: " + answer);
                         answers.add(answer.clone());
                     }
@@ -126,15 +126,15 @@ public class AnswerMySqlDao implements AnswerDao {
                     if (resultSet.next()) {
                         Answer answer = new Answer()
                                 .id(id)
-                                .filePath(resultSet.getString(AnswerTable.PATH.name()))
-                                .mark(resultSet.getInt(AnswerTable.MARK.name()))
-                                .ectsMark(resultSet.getString(AnswerTable.ECTS.name()))
-                                .sent(resultSet.getString(AnswerTable.SENT.name()))
-                                .checked(resultSet.getString(AnswerTable.CHECKED.name()))
-                                .comment(resultSet.getString(AnswerTable.COMMENT.name()))
-                                .student(getUserById(resultSet.getLong(AnswerTable.USER_ID.name()), connection))
-                                .status(AnswerStatus.valueOf(resultSet.getString(AnswerTable.NAME.name())));
-                        logger.info("Got answer");
+                                .filePath(resultSet.getString(Columns.path))
+                                .mark(resultSet.getInt(Columns.mark))
+                                .ectsMark(resultSet.getString(Columns.ects))
+                                .sent(resultSet.getString(Columns.sent))
+                                .checked(resultSet.getString(Columns.checked))
+                                .comment(resultSet.getString(Columns.comment))
+                                .student(getUserById(resultSet.getLong(Columns.user_id), connection))
+                                .status(AnswerStatus.valueOf(resultSet.getString(Columns.name)));
+                        logger.info("Get answer: " + answer);
                         return Optional.of(answer);
                     }
                 }
@@ -143,6 +143,7 @@ public class AnswerMySqlDao implements AnswerDao {
             logger.error(e.getMessage());
             e.printStackTrace();
         }
+        logger.error("Do not get answer by id: " + id);
         return Optional.empty();
     }
 
@@ -154,10 +155,10 @@ public class AnswerMySqlDao implements AnswerDao {
             try (ResultSet resultSet = preparedStatement.executeQuery()){
                 if (resultSet.next()) {
                     User student = new User()
-                            .lastname(resultSet.getString(UserTable.LASTNAME.name()))
-                            .firstname(resultSet.getString(UserTable.FIRSTNAME.name()))
-                            .email(resultSet.getString(UserTable.EMAIL.name()));
-                    logger.info("Got student!");
+                            .lastname(resultSet.getString(Columns.lastname))
+                            .firstname(resultSet.getString(Columns.firstname))
+                            .email(resultSet.getString(Columns.email));
+                    logger.info("Get student: " + student);
                     return student;
                 }
             }
@@ -165,6 +166,7 @@ public class AnswerMySqlDao implements AnswerDao {
             logger.error(e.getMessage());
             e.printStackTrace();
         }
+        logger.error("Do not get student by id: " + id);
         return new User();
     }
 
@@ -176,7 +178,8 @@ public class AnswerMySqlDao implements AnswerDao {
             preparedStatement.setString(1, name);
             try (ResultSet resultSet = preparedStatement.executeQuery()){
                 if (resultSet.next()) {
-                    id = resultSet.getLong(AnswerStatusTable.ID.name());
+                    id = resultSet.getLong(Columns.id);
+                    logger.info("Get id of user: " + id);
                 }
             }
         } catch (SQLException e) {
@@ -194,7 +197,8 @@ public class AnswerMySqlDao implements AnswerDao {
             preparedStatement.setString(1, email);
             try (ResultSet resultSet = preparedStatement.executeQuery()){
                 if (resultSet.next()) {
-                    id = resultSet.getLong(AnswerStatusTable.ID.name());
+                    id = resultSet.getLong(Columns.id);
+                    logger.info("Get id of user: " + id);
                 }
             }
         } catch (SQLException e) {

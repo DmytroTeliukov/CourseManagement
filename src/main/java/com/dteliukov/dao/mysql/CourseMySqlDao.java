@@ -1,7 +1,7 @@
 package com.dteliukov.dao.mysql;
 
 import com.dteliukov.dao.CourseDao;
-import com.dteliukov.dao.mysql.tables.*;
+import com.dteliukov.dao.schema.Columns;
 import com.dteliukov.model.*;
 import com.dteliukov.notification.Student;
 import org.apache.logging.log4j.LogManager;
@@ -31,25 +31,7 @@ public class CourseMySqlDao implements CourseDao {
                 preparedStatement.setString(1, course.getName());
                 preparedStatement.setLong(2, teacherId);
                 preparedStatement.executeUpdate();
-                logger.info("Course saved!");
-            }
-        } catch (SQLException e) {
-            logger.error(e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void editTeacherByEmail(String email, Long courseId) {
-        String editTeacherScript = editTeacherScript();
-        logger.info("Edit teacher sql script: " + editTeacherScript);
-        try(Connection connection = MySqlConnection.getConnection()) {
-            long id = getTeacherId(email, connection);
-            try(PreparedStatement preparedStatement = connection.prepareStatement(editTeacherScript)) {
-                preparedStatement.setLong(1, id);
-                preparedStatement.setLong(2, courseId);
-                preparedStatement.executeUpdate();
-                logger.info("Teacher changed!");
+                logger.info("Course inserted into database: " + course);
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -67,7 +49,7 @@ public class CourseMySqlDao implements CourseDao {
                 preparedStatement.setString(2, material.getPath());
                 preparedStatement.setLong(3, courserId);
                 preparedStatement.executeUpdate();
-                logger.info("Material is saved!");
+                logger.info("Material inserted into database: " + material);
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -88,7 +70,7 @@ public class CourseMySqlDao implements CourseDao {
                 preparedStatement.setString(4, task.getDeadline());
                 preparedStatement.setLong(5, courseId);
                 preparedStatement.executeUpdate();
-                logger.info("Task saved!");
+                logger.info("Task inserted into database: " + task);
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -122,7 +104,7 @@ public class CourseMySqlDao implements CourseDao {
                 preparedStatement.setLong(1, studentId);
                 preparedStatement.setLong(2, courseId);
                 preparedStatement.executeUpdate();
-                logger.info("Student added!");
+                logger.info("Student by email \"" + email + "\" registered to course");
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -140,7 +122,7 @@ public class CourseMySqlDao implements CourseDao {
                 preparedStatement.setLong(1, studentId);
                 preparedStatement.setLong(2, courseId);
                 preparedStatement.executeUpdate();
-                logger.info("Student deleted!");
+                logger.info("Student by email \"" + email + "\" expelled from course");
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -159,7 +141,7 @@ public class CourseMySqlDao implements CourseDao {
                 preparedStatement.setString(3, task.getDeadline());
                 preparedStatement.setLong(4, task.getId());
                 preparedStatement.executeUpdate();
-                logger.info("Task updated!");
+                logger.info("Updated task inserted into database: " + task);
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -192,7 +174,7 @@ public class CourseMySqlDao implements CourseDao {
                 preparedStatement.setString(1, course.getName());
                 preparedStatement.setLong(2, course.getId());
                 preparedStatement.executeUpdate();
-                logger.info("Course updated!");
+                logger.info("Updated course inserted into database: " + course);
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -225,9 +207,11 @@ public class CourseMySqlDao implements CourseDao {
             try (PreparedStatement preparedStatement = connection.prepareStatement(getCoursesScript)) {
                 try (ResultSet resultSet = preparedStatement.executeQuery()){
                     while (resultSet.next()) {
-                        courses.add(new Course(resultSet.getLong(CourseTable.ID.name()),
-                            getUserById(resultSet.getLong(CourseTable.USER_ID.name())),
-                            resultSet.getString(CourseTable.NAME.name())));
+                        var course = new Course(resultSet.getLong(Columns.id),
+                                getUserById(resultSet.getLong(Columns.user_id)),
+                                resultSet.getString(Columns.name));
+                        logger.info("Got course: " + course);
+                        courses.add(course);
                     }
                     logger.info("Got all courses!");
                 }
@@ -250,12 +234,13 @@ public class CourseMySqlDao implements CourseDao {
                 try (ResultSet resultSet = preparedStatement.executeQuery()){
                     while (resultSet.next()) {
                         Student student = (Student) new Student()
-                                .lastname(resultSet.getString(UserTable.LASTNAME.name()))
-                                .firstname(resultSet.getString(UserTable.FIRSTNAME.name()))
-                                .email(resultSet.getString(UserTable.EMAIL.name()));
+                                .lastname(resultSet.getString(Columns.lastname))
+                                .firstname(resultSet.getString(Columns.firstname))
+                                .email(resultSet.getString(Columns.email));
                         students.add(student.clone());
                         logger.info("Get student from course: " + student);
                     }
+                    logger.info("Got all students from course!");
                 }
             }
         } catch (SQLException e) {
@@ -275,14 +260,14 @@ public class CourseMySqlDao implements CourseDao {
                 preparedStatement.setLong(1, courseId);
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        User teacher = getUserById(resultSet.getLong(CourseTable.USER_ID.name()));
+                        User teacher = getUserById(resultSet.getLong(Columns.user_id));
                         Course course = new Course(courseId,
                                 teacher,
-                                resultSet.getString(CourseTable.NAME.name()));
+                                resultSet.getString(Columns.name));
                         List<Material> materials = getMaterialsByCourseId(courseId, connection);
                         List<Task> tasks = getTasksByCourseId(courseId, connection);
                         courseDetail.course(course).tasks(tasks).materials(materials);
-                        logger.info("Got course sql script!");
+                        logger.info("Got course details: " + courseDetail);
                         return Optional.of(courseDetail);
                     }
                 }
@@ -291,6 +276,7 @@ public class CourseMySqlDao implements CourseDao {
             logger.error(e.getMessage());
             e.printStackTrace();
         }
+        logger.info("Course details did not get");
         return Optional.empty();
     }
 
@@ -303,10 +289,11 @@ public class CourseMySqlDao implements CourseDao {
                 preparedStatement.setString(1, name);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        long id = resultSet.getLong(CourseTable.ID.name());
-                        User teacher = getUserById(resultSet.getLong(CourseTable.USER_ID.name()));
-                        logger.info("Got course by name!");
-                        return Optional.of(new Course(id, teacher, name));
+                        long id = resultSet.getLong(Columns.id);
+                        User teacher = getUserById(resultSet.getLong(Columns.user_id));
+                        var course = new Course(id, teacher, name);
+                        logger.info("Got course by name: " + course);
+                        return Optional.of(course);
                     }
                 }
              }
@@ -314,6 +301,7 @@ public class CourseMySqlDao implements CourseDao {
             logger.error(e.getMessage());
             e.printStackTrace();
         }
+        logger.info("Course by name did not get");
         return Optional.empty();
     }
 
@@ -325,10 +313,10 @@ public class CourseMySqlDao implements CourseDao {
             preparedStatement.setString(1, email);
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    id = resultSet.getLong(UserTable.ID.name());
+                    id = resultSet.getLong(Columns.id);
                 }
             }
-            logger.info("Teacher id = " + id);
+            logger.info("Teacher id: " + id);
         } catch (SQLException e) {
             logger.error(e.getMessage());
             e.printStackTrace();
@@ -344,32 +332,15 @@ public class CourseMySqlDao implements CourseDao {
             preparedStatement.setString(1, email);
             try (ResultSet resultSet = preparedStatement.executeQuery()){
                 if (resultSet.next()) {
-                    id = resultSet.getLong(AnswerStatusTable.ID.name());
+                    id = resultSet.getLong(Columns.id);
                 }
+                logger.info("User id: " + id);
             }
         } catch (SQLException e) {
             logger.error(e.getMessage());
             e.printStackTrace();
         }
         return id;
-    }
-
-    private String getUserIdScript() {
-        return "select id from `user` where email = ?";
-    }
-    private String getStudentsScript() {
-        return """
-                select `user`.`lastname`, `user`.`firstname`, `user`.`email` from `user`\s
-                inner join  `student-course` on `student-course`.`user_id` = `user`.`id`
-                where `student-course`.`course_id` = ?;""";
-    }
-
-    private String getMaterialsByCourseId() {
-        return "select id, `name`, `path` from material where course_id = ?;";
-    }
-
-    private String getTasksByCourseId() {
-        return "select id, theme, `description`, created, deadline from task where course_id = ?;";
     }
 
     public User getUserById(Long id) {
@@ -381,9 +352,9 @@ public class CourseMySqlDao implements CourseDao {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
                         User user = new User()
-                                .lastname(resultSet.getString(UserTable.LASTNAME.name()))
-                                .firstname(resultSet.getString(UserTable.FIRSTNAME.name()))
-                                .email(resultSet.getString(UserTable.EMAIL.name()));
+                                .lastname(resultSet.getString(Columns.lastname))
+                                .firstname(resultSet.getString(Columns.firstname))
+                                .email(resultSet.getString(Columns.email));
                         logger.info("Get user profile : " + user.toString());
                         return user.clone();
                     }
@@ -406,9 +377,11 @@ public class CourseMySqlDao implements CourseDao {
             preparedStatement.setLong(1, id);
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    materials.add(new Material(resultSet.getLong(MaterialTable.ID.name()),
-                            resultSet.getString(MaterialTable.NAME.name()),
-                            resultSet.getString(MaterialTable.PATH.name())));
+                    var material = new Material(resultSet.getLong(Columns.id),
+                            resultSet.getString(Columns.name),
+                            resultSet.getString(Columns.path));
+                    logger.info("Got material: " + material);
+                    materials.add(material);
                 }
                 logger.info("Got materials from course!");
             }
@@ -419,6 +392,7 @@ public class CourseMySqlDao implements CourseDao {
         return materials;
     }
 
+
     private List<Task> getTasksByCourseId(Long id, Connection connection) {
         List<Task> tasks = new LinkedList<>();
         String getTasksByCourseIdScript = getTasksByCourseId();
@@ -428,11 +402,11 @@ public class CourseMySqlDao implements CourseDao {
             try(ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     Task task = new Task()
-                            .id(resultSet.getLong(TaskTable.ID.name()))
-                            .theme(resultSet.getString(TaskTable.THEME.name()))
-                            .description(resultSet.getString(TaskTable.DESCRIPTION.name()))
-                            .created(resultSet.getString(TaskTable.CREATED.name()))
-                            .deadline(resultSet.getString(TaskTable.DEADLINE.name()));
+                            .id(resultSet.getLong(Columns.id))
+                            .theme(resultSet.getString(Columns.theme))
+                            .description(resultSet.getString(Columns.description))
+                            .created(resultSet.getString(Columns.created))
+                            .deadline(resultSet.getString(Columns.deadline));
                     logger.info("Got task from course: " + task);
                     tasks.add(task.clone());
                 }
@@ -445,6 +419,23 @@ public class CourseMySqlDao implements CourseDao {
         return tasks;
     }
 
+    private String getUserIdScript() {
+        return "select id from `user` where email = ?";
+    }
+    private String getStudentsScript() {
+        return """
+                select `user`.`lastname`, `user`.`firstname`, `user`.`email` from `user`\s
+                inner join  `student-course` on `student-course`.`user_id` = `user`.`id`
+                where `student-course`.`course_id` = ?;""";
+    }
+
+    private String getMaterialsByCourseId() {
+        return "select id, `name`, `path` from material where course_id = ?;";
+    }
+
+    private String getTasksByCourseId() {
+        return "select id, theme, `description`, created, deadline from task where course_id = ?;";
+    }
     public String addGroupScript() {
         return "insert into `student-course`(user_id, course_id) values (?,?)";
     }
