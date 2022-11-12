@@ -472,10 +472,7 @@ public class CourseMySqlDao implements CourseDao {
     private String getCourseByNameScript() {
         return "select id, user_id from `course` where name = ?;";
     }
-    private String editTeacherScript() {
-        return "update `course` set user_id = ? where id = ?;";
-    }
-    private String editCourseScript() {
+     private String editCourseScript() {
         return "update `course` set name = ? where id = ?;";
     }
 

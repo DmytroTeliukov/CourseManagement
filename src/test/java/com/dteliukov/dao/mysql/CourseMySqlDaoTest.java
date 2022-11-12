@@ -114,6 +114,24 @@ class CourseMySqlDaoTest {
 
     @Test
     @Order(7)
+    @DisplayName("Retrieve courses successfully")
+    void retrieveCourseDetailSuccessfully() {
+        var courses = courseDao.getDetail(courseId);
+
+        assertFalse(courses.isEmpty());
+    }
+
+    @Test
+    @Order(8)
+    @DisplayName("Retrieve courses successfully")
+    void failRetrievingCourseDetail() {
+        var courses = courseDao.getDetail(Long.MAX_VALUE);
+
+        assertTrue(courses.isEmpty());
+    }
+
+    @Test
+    @Order(9)
     @DisplayName("Edit name of course")
     void editNameCourse() {
         var course = courseDao.getByName(prototypeCourse.getName());
@@ -126,7 +144,7 @@ class CourseMySqlDaoTest {
     }
 
     @Test
-    @Order(8)
+    @Order(10)
     @DisplayName("Edit task on course")
     void editTaskOnCourse() {
         var course = courseDao.getDetail(courseId);
