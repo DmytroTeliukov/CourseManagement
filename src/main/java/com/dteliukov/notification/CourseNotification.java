@@ -1,7 +1,7 @@
 package com.dteliukov.notification;
 
 import com.dteliukov.dao.CourseDao;
-import com.dteliukov.dao.DaoManager;
+import com.dteliukov.dao.DaoFactory;
 import com.dteliukov.dao.TypeDao;
 import com.dteliukov.model.Course;
 
@@ -16,7 +16,7 @@ public class CourseNotification implements Publisher<Student>{
 
     public CourseNotification(Course course) {
         this.course = course;
-        courseRepository = DaoManager.getRepository(TypeDao.MYSQL).getCourseDao();
+        courseRepository = DaoFactory.getRepository(TypeDao.MYSQL).getCourseDao();
         students = courseRepository.retrieveStudents(course.getId()).stream().toList();
     }
 
