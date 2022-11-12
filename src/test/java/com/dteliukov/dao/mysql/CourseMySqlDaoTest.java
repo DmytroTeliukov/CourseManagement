@@ -20,8 +20,6 @@ class CourseMySqlDaoTest {
     private static User prototypeStudent;
     private static User prototypeTeacher;
 
-    private static User anotherPrototypeTeacher;
-
     private static Material prototypeMaterial;
 
     private static Task prototypeTask;
@@ -34,22 +32,19 @@ class CourseMySqlDaoTest {
 
     @BeforeAll
     static void setUpCourseDaoTest() {
-        DaoRepository repository = DaoManager.getRepository(TypeDao.MYSQL);
+        DaoRepository repository = DaoFactory.getRepository(TypeDao.MYSQL);
         userDao = Objects.requireNonNull(repository).getUserDao();
         courseDao = Objects.requireNonNull(repository).getCourseDao();
         prototypeStudent = new User("testLastname", "testFirstname",
                 "teststudent@gmail", "user", Role.STUDENT);
         prototypeTeacher = new User("testLastname", "testFirstname",
                 "testteacher@gmail", "user", Role.TEACHER);
-        anotherPrototypeTeacher = new User("testAnotherLastname", "testAnotherFirstname",
-                "testanotherteacher@gmail", "user", Role.TEACHER);
         prototypeCourse = new Course(null, prototypeTeacher, "testCourse");
         prototypeMaterial = new Material(null, "nameMaterial", "C:/path" );
         prototypeTask = new Task(null, "theme", "description",
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toString(), null);
-        userDao.registryUser(prototypeStudent);
-        userDao.registryUser(prototypeTeacher);
-        userDao.registryUser(anotherPrototypeTeacher);
+        userDao.registerUser(prototypeStudent);
+        userDao.registerUser(prototypeTeacher);
         courseDao.createCourse(prototypeCourse);
         courseId = courseDao.getByName(prototypeCourse.getName()).get().getId();
         courseDao.registryStudent(prototypeStudent.getEmail(), courseId);
@@ -147,19 +142,6 @@ class CourseMySqlDaoTest {
         assertEquals(editedTask, updatedTask);
     }
 
-
-    @Test
-    @Order(10)
-    @DisplayName("Edit teacher of course")
-    void editTeacherCourse() {
-        var course = courseDao.getByName(prototypeCourse.getName());
-        var editedCourse = course.get().teacher(anotherPrototypeTeacher);
-        courseDao.editTeacherByEmail(editedCourse.getTeacher().getEmail(), courseId);
-        var updatedCourse = courseDao.getByName(prototypeCourse.getName());
-        courseDao.editCourse(prototypeCourse.id(editedCourse.getId()));
-
-        assertEquals(editedCourse.getTeacher().getEmail(), updatedCourse.get().getTeacher().getEmail());
-    }
 
     @AfterAll
     static void deletePrototypes() {

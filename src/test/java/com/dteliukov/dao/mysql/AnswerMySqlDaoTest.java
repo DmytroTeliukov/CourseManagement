@@ -31,7 +31,7 @@ class AnswerMySqlDaoTest {
 
     @BeforeAll
     static void setUpAnswerDaoTest() {
-        DaoRepository repository = DaoManager.getRepository(TypeDao.MYSQL);
+        DaoRepository repository = DaoFactory.getRepository(TypeDao.MYSQL);
         userDao = Objects.requireNonNull(repository).getUserDao();
         courseDao = Objects.requireNonNull(repository).getCourseDao();
         answerDao = Objects.requireNonNull(repository).getAnswerDao();
@@ -45,8 +45,8 @@ class AnswerMySqlDaoTest {
         prototypeAnswer = new Answer(null, prototypeStudent,
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), null,
                 null, "C:/path", 0, null, AnswerStatus.WAITING);
-        userDao.registryUser(prototypeStudent);
-        userDao.registryUser(prototypeTeacher);
+        userDao.registerUser(prototypeStudent);
+        userDao.registerUser(prototypeTeacher);
         courseDao.createCourse(prototypeCourse);
         courseId = courseDao.getByName(prototypeCourse.getName()).get().getId();
         courseDao.registryStudent(prototypeStudent.getEmail(), courseId);
