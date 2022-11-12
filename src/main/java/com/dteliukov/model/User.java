@@ -1,14 +1,20 @@
 package com.dteliukov.model;
 
 import com.dteliukov.enums.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
 public class User {
+    @JsonProperty("lastname")
     protected String lastname;
+    @JsonProperty("firstname")
     protected String firstname;
+    @JsonProperty("email")
     protected String email;
+    @JsonProperty("password")
     protected String password;
+    @JsonProperty("role")
     protected Role role;
 
     public User() {}

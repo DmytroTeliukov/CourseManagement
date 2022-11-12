@@ -15,6 +15,6 @@ public class MongoDBDaoRepository extends DaoRepository {
 
     @Override
     public UserDao getUserDao() {
-        return null;
+        return new UserMongoDBDao();
     }
 }
