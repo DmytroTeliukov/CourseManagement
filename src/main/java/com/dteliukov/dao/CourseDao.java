@@ -8,7 +8,6 @@ import java.util.Optional;
 
 public interface CourseDao {
     void createCourse(Course course);
-    void editTeacherByEmail(String email, Long courseId);
     void addMaterial(Material material, Long courserId);
     void addTask(Task task, Long courseId);
     void deleteMaterial(Long id);
