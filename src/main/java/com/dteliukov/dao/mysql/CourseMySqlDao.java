@@ -7,10 +7,7 @@ import com.dteliukov.notification.Student;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -95,17 +92,24 @@ public class CourseMySqlDao implements CourseDao {
     }
 
     @Override
-    public void registryStudent(String email, Long courseId) {
+    public void registerStudent(String email, Long courseId) {
         String addCourseScript = addGroupScript();
         logger.info("Add student sql script: " + addCourseScript);
         try (Connection connection = MySqlConnection.getConnection()) {
+            connection.setAutoCommit(false);
             long studentId = getUserId(email, connection);
             try (PreparedStatement preparedStatement = connection.prepareStatement(addCourseScript)) {
                 preparedStatement.setLong(1, studentId);
                 preparedStatement.setLong(2, courseId);
                 preparedStatement.executeUpdate();
+                connection.commit();
                 logger.info("Student by email \"" + email + "\" registered to course");
+
+            } catch (SQLException e) {
+                logger.error("Rollback transaction of registering student");
+                connection.rollback();
             }
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
             logger.error(e.getMessage());
             e.printStackTrace();
@@ -117,13 +121,19 @@ public class CourseMySqlDao implements CourseDao {
         String removeStudentScript = removeStudentScript();
         logger.info("Delete student sql script: " + removeStudentScript);
         try (Connection connection = MySqlConnection.getConnection()) {
+            connection.setAutoCommit(false);
             long studentId = getUserId(email, connection);
             try (PreparedStatement preparedStatement = connection.prepareStatement(removeStudentScript)) {
                 preparedStatement.setLong(1, studentId);
                 preparedStatement.setLong(2, courseId);
                 preparedStatement.executeUpdate();
                 logger.info("Student by email \"" + email + "\" expelled from course");
+                connection.commit();
+            } catch (SQLException e) {
+                logger.error("Rollback transaction of removing student");
+                connection.rollback();
             }
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
             logger.error(e.getMessage());
             e.printStackTrace();
@@ -229,9 +239,9 @@ public class CourseMySqlDao implements CourseDao {
         Collection<Student> students = new LinkedList<>();
         logger.info("Get students in course sql script: " + getStudentsScript);
         try (Connection connection = MySqlConnection.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(getStudentsScript)){
-                preparedStatement.setLong(1, courseId);
-                try (ResultSet resultSet = preparedStatement.executeQuery()){
+            try (CallableStatement callableStatement = connection.prepareCall(getStudentsScript)){
+                callableStatement.setLong(1, courseId);
+                try (ResultSet resultSet = callableStatement.executeQuery()){
                     while (resultSet.next()) {
                         Student student = (Student) new Student()
                                 .lastname(resultSet.getString(Columns.lastname))
@@ -423,10 +433,7 @@ public class CourseMySqlDao implements CourseDao {
         return "select id from `user` where email = ?";
     }
     private String getStudentsScript() {
-        return """
-                select `user`.`lastname`, `user`.`firstname`, `user`.`email` from `user`\s
-                inner join  `student-course` on `student-course`.`user_id` = `user`.`id`
-                where `student-course`.`course_id` = ?;""";
+        return "call get_students_in_course(?);";
     }
 
     private String getMaterialsByCourseId() {

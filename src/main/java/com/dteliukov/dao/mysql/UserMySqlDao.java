@@ -152,6 +152,7 @@ public class UserMySqlDao implements UserDao {
         } catch (SQLException e) {
             logger.error(e.getMessage());
         }
+        logger.error("Do not get user profile");
         return Optional.empty();
     }
 

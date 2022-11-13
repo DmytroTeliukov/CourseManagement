@@ -49,7 +49,7 @@ class AnswerMySqlDaoTest {
         userDao.registerUser(prototypeTeacher);
         courseDao.createCourse(prototypeCourse);
         courseId = courseDao.getByName(prototypeCourse.getName()).get().getId();
-        courseDao.registryStudent(prototypeStudent.getEmail(), courseId);
+        courseDao.registerStudent(prototypeStudent.getEmail(), courseId);
         courseDao.addTask(prototypeTask, courseId);
         taskId = courseDao.getDetail(courseId).get().getTasks().stream()
                 .filter(task -> task.equals(prototypeTask))
@@ -85,8 +85,8 @@ class AnswerMySqlDaoTest {
     void reviewAnswer() {
         var reviewedAnswer = answerDao.get(answerId);
         reviewedAnswer.get()
-                .mark(96)
-                .ectsMark(ECTS.getECTSMark(96).name())
+                .mark(95)
+                .ectsMark(ECTS.getECTSMark(95).name())
                 .checked(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .status(AnswerStatus.CHECKED);
         answerDao.editAnswer(reviewedAnswer.get());

@@ -47,7 +47,7 @@ class CourseMySqlDaoTest {
         userDao.registerUser(prototypeTeacher);
         courseDao.createCourse(prototypeCourse);
         courseId = courseDao.getByName(prototypeCourse.getName()).get().getId();
-        courseDao.registryStudent(prototypeStudent.getEmail(), courseId);
+        courseDao.registerStudent(prototypeStudent.getEmail(), courseId);
     }
 
     @Test

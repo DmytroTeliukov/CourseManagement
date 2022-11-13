@@ -11,7 +11,7 @@ public interface CourseDao {
     void addMaterial(Material material, Long courserId);
     void addTask(Task task, Long courseId);
     void deleteMaterial(Long id);
-    void registryStudent(String email, Long courseId);
+    void registerStudent(String email, Long courseId);
     void removeStudent(String email, Long courseId);
     void editTask(Task task);
     void deleteTask(Long id);
