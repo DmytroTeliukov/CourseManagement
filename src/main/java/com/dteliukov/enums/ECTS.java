@@ -3,13 +3,13 @@ package com.dteliukov.enums;
 import java.util.Arrays;
 
 public enum ECTS {
-    F(1),
-    FX(35),
-    E(60),
-    D(67),
-    C(75),
+    A(96),
     B(90),
-    A(96);
+    C(75),
+    D(67),
+    E(60),
+    FX(35),
+    F(1);
     private final int minRangeMark;
 
     ECTS(int minRangeMark) {
