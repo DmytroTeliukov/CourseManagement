@@ -261,6 +261,34 @@ public class CourseMySqlDao implements CourseDao {
     }
 
     @Override
+    public Collection<Course> retrieveCoursesByStudentEmail(String email) {
+        String getCoursesByStudentEmail = getCoursesStudentByEmail();
+        Collection<Course> courses = new LinkedList<>();
+        logger.info("Get course of student sql script: " + getCoursesByStudentEmail);
+        try (Connection connection = MySqlConnection.getConnection()) {
+            try (CallableStatement callableStatement = connection.prepareCall(getCoursesByStudentEmail)){
+                callableStatement.setString(1, email);
+                try (ResultSet resultSet = callableStatement.executeQuery()){
+                    while (resultSet.next()) {
+                        User teacher = new User().lastname(resultSet.getString(Columns.lastname))
+                                .firstname(resultSet.getString(Columns.firstname))
+                                .email(resultSet.getString(Columns.email));
+                        Course course = new Course(resultSet.getLong(Columns.id),
+                                teacher.clone(), resultSet.getString(Columns.name));
+                        courses.add(course);
+                        logger.info("Get courses of student: " + course);
+                    }
+                    logger.info("Got all courses of student!");
+                }
+            }
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+        }
+        return courses;
+    }
+
+    @Override
     public Optional<CourseDetail> getDetail(Long courseId) {
         String getCourseScript = getCourseScript();
         CourseDetail courseDetail = new CourseDetail();
@@ -455,6 +483,10 @@ public class CourseMySqlDao implements CourseDao {
 
     private String addTaskScript() {
         return "insert into `task`(theme, description, created, deadline, course_id) values(?,?,?,?,?)";
+    }
+
+    private String getCoursesStudentByEmail() {
+        return "call get_courses_of_student(?);";
     }
 
     private String getTeacherIdScript() {

@@ -1,11 +1,17 @@
 package com.dteliukov.model;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Objects;
 
 public class Course {
+    @SerializedName(value = "course_id")
     private Long id;
+    @SerializedName(value = "teacher")
     private User teacher;
+    @SerializedName(value = "name")
     private String name;
 
     public Course(Long id, User teacher, String name) {

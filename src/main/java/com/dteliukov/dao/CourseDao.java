@@ -19,6 +19,7 @@ public interface CourseDao {
     void deleteCourse(Long id);
     Collection<Course> retrieveCourses();
     Collection<Student> retrieveStudents(Long courseId);
+    Collection<Course> retrieveCoursesByStudentEmail(String email);
     Optional<CourseDetail> getDetail(Long courseId);
     Optional<Course> getByName(String name);
 

@@ -114,7 +114,7 @@ class CourseMySqlDaoTest {
 
     @Test
     @Order(7)
-    @DisplayName("Retrieve courses successfully")
+    @DisplayName("Retrieve course detail successfully")
     void retrieveCourseDetailSuccessfully() {
         var courses = courseDao.getDetail(courseId);
 
@@ -123,7 +123,7 @@ class CourseMySqlDaoTest {
 
     @Test
     @Order(8)
-    @DisplayName("Retrieve courses successfully")
+    @DisplayName("Fail retrieving course detail")
     void failRetrievingCourseDetail() {
         var courses = courseDao.getDetail(Long.MAX_VALUE);
 
@@ -160,6 +160,14 @@ class CourseMySqlDaoTest {
         assertEquals(editedTask, updatedTask);
     }
 
+    @Test
+    @Order(11)
+    @DisplayName("Retrieve courses of student")
+    void retrieveCoursesStudent() {
+        var courses = courseDao.retrieveCoursesByStudentEmail(prototypeStudent.getEmail());
+
+        assertFalse(courses.isEmpty());
+    }
 
     @AfterAll
     static void deletePrototypes() {
