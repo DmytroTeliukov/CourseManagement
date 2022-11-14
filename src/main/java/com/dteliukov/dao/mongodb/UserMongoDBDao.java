@@ -1,6 +1,8 @@
 package com.dteliukov.dao.mongodb;
 
 import com.dteliukov.dao.UserDao;
+import com.dteliukov.dao.schema.Collections;
+import com.dteliukov.dao.schema.Columns;
 import com.dteliukov.model.AuthorizedUser;
 import com.dteliukov.model.UnauthorizedUser;
 import com.dteliukov.model.User;
@@ -21,14 +23,18 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class UserMongoDBDao implements UserDao {
     private static final Logger logger = LogManager.getLogger(UserMongoDBDao.class);
+    private final Gson gson;
+
+    public UserMongoDBDao() {
+        gson = new Gson();
+    }
     @Override
     public Optional<AuthorizedUser> login(UnauthorizedUser user) {
-        Gson gson = new Gson();
         try (var connection = MongoDBConnection.getConnection()) {
             FindIterable<Document> filter = connection
                     .getDatabase(MongoDBConnection.dbName)
-                    .getCollection("users")
-                    .find(new Document("email", user.email()));
+                    .getCollection(Collections.users)
+                    .find(new Document(Columns.email, user.email()));
             logger.info("Authorize user: " + user);
             try (var cursor = filter.cursor()) {
                 if (cursor.hasNext()) {
@@ -52,14 +58,15 @@ public class UserMongoDBDao implements UserDao {
     public void registerUser(User user) {
         try (var connection = MongoDBConnection.getConnection()) {
             var usersCollection = connection
-                    .getDatabase(MongoDBConnection.dbName).getCollection("users");
+                    .getDatabase(MongoDBConnection.dbName).getCollection(Collections.users);
             Document newUser = new Document();
-            newUser.append("lastname", user.getLastname())
-                    .append("firstname", user.getFirstname())
-                    .append("email", user.getEmail())
-                    .append("password", SecurityPasswordUtil.getSecuredPassword(user.getPassword()))
-                    .append("role", user.getRole().name());
+            newUser.append(Columns.lastname, user.getLastname())
+                    .append(Columns.firstname, user.getFirstname())
+                    .append(Columns.email, user.getEmail())
+                    .append(Columns.password, SecurityPasswordUtil.getSecuredPassword(user.getPassword()))
+                    .append(Columns.role, user.getRole().name());
             usersCollection.insertOne(newUser);
+            logger.info("User inserted into database: " + user);
         }
 
     }
@@ -68,14 +75,15 @@ public class UserMongoDBDao implements UserDao {
     public void editUser(User user) {
         try (var connection = MongoDBConnection.getConnection()) {
             var collection = connection.getDatabase(MongoDBConnection.dbName)
-                    .getCollection("users");
-            Bson filter = eq("email", user.getEmail());
+                    .getCollection(Collections.users);
+            Bson filter = eq(Columns.email, user.getEmail());
             Bson updates = Updates.combine(
-                    Updates.set("lastname", user.getLastname()),
-                    Updates.set("firstname", user.getFirstname()),
-                    Updates.set("email", user.getEmail()),
-                    Updates.set("role", user.getRole().name()));
+                    Updates.set(Columns.lastname, user.getLastname()),
+                    Updates.set(Columns.firstname, user.getFirstname()),
+                    Updates.set(Columns.email, user.getEmail()),
+                    Updates.set(Columns.role, user.getRole().name()));
             collection.updateOne(filter, updates);
+            logger.info("Updated user inserted into database: " + user);
         }
     }
 
@@ -83,24 +91,27 @@ public class UserMongoDBDao implements UserDao {
     public void deleteUser(String email) {
         try (var connection = MongoDBConnection.getConnection()) {
             var collection = connection.getDatabase(MongoDBConnection.dbName)
-                    .getCollection("users");
-            Bson filter = eq("email", email);
+                    .getCollection(Collections.users);
+            Bson filter = eq(Columns.email, email);
             collection.deleteOne(filter);
+            logger.info("User " + email + " deleted successfully!");
         }
     }
 
     @Override
     public Collection<User> retrieveUsers() {
-        Gson gson = new Gson();
         Collection<User> users = new LinkedList<>();
         try (var connection = MongoDBConnection.getConnection()) {
             var collection = connection
                     .getDatabase(MongoDBConnection.dbName)
-                    .getCollection("users").find();
+                    .getCollection(Collections.users).find();
             try (var cursor = collection.cursor()) {
                 if (cursor.hasNext()) {
-                    users.add(gson.fromJson(cursor.next().toJson(), User.class));
+                    var user = gson.fromJson(cursor.next().toJson(), User.class);
+                    logger.info("Get user: " + user);
+                    users.add(user);
                 }
+                logger.info("Get users from mongodb database!");
             }
         }
         return users;
@@ -108,18 +119,20 @@ public class UserMongoDBDao implements UserDao {
 
     @Override
     public Optional<User> getUserByEmail(String email) {
-        Gson gson = new Gson();
         try (var connection = MongoDBConnection.getConnection()) {
             FindIterable<Document> filter = connection
                     .getDatabase(MongoDBConnection.dbName)
-                    .getCollection("users")
-                    .find(new Document("email", email));
+                    .getCollection(Collections.users)
+                    .find(new Document(Columns.email, email));
             try (var cursor = filter.cursor()) {
                 if (cursor.hasNext()) {
-                    return Optional.of(gson.fromJson(cursor.next().toJson(), User.class));
+                    var user = gson.fromJson(cursor.next().toJson(), User.class);
+                    logger.info("Get user profile : " + user);
+                    return Optional.of(user);
                 }
             }
         }
+        logger.error("Do not get user profile");
         return Optional.empty();
     }
 

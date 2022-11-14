@@ -10,7 +10,7 @@ public class MongoDBDaoRepository extends DaoRepository {
 
     @Override
     public CourseDao getCourseDao() {
-        return null;
+        return new CourseMongoDBDao();
     }
 
     @Override

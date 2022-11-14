@@ -17,12 +17,12 @@ class IdGeneratorTest {
     @DisplayName("Check set unique id")
     @RepeatedTest(10)
     void checkSetUniqueId() {
-        var ids = new LinkedList<Long>();
+        var ids = new LinkedList<Integer>();
         for (int i = 0; i < 50000; i++) {
             ids.add(IdGenerator.generateId());
         }
 
-        Set<Long> idSet = new HashSet<>(ids);
+        Set<Integer> idSet = new HashSet<>(ids);
 
         assertEquals(ids.size(), idSet.size());
     }
