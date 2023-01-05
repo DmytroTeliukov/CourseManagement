@@ -1,20 +1,20 @@
 package com.dteliukov.model;
 
 import com.dteliukov.enums.Role;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
 
 public class User {
-    @JsonProperty("lastname")
+    @SerializedName("lastname")
     protected String lastname;
-    @JsonProperty("firstname")
+    @SerializedName("firstname")
     protected String firstname;
-    @JsonProperty("email")
+    @SerializedName("email")
     protected String email;
-    @JsonProperty("password")
+    @SerializedName("password")
     protected String password;
-    @JsonProperty("role")
+    @SerializedName("role")
     protected Role role;
 
     public User() {}

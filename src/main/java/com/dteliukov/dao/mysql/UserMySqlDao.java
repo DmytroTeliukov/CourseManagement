@@ -59,7 +59,7 @@ public class UserMySqlDao implements UserDao {
                 preparedStatement.setString(1, user.getLastname());
                 preparedStatement.setString(2, user.getFirstname());
                 preparedStatement.setString(3, user.getEmail());
-                preparedStatement.setString(4, SecurityPasswordUtil.getSecuredPassword(user.getPassword()));
+                preparedStatement.setString(4, user.getPassword());
                 preparedStatement.setString(5, user.getRole().name());
                 preparedStatement.executeUpdate();
                 logger.info("User inserted into database: " + user);

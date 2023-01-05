@@ -7,6 +7,7 @@ import com.dteliukov.dao.UserDao;
 import com.dteliukov.enums.Role;
 import com.dteliukov.model.UnauthorizedUser;
 import com.dteliukov.model.User;
+import com.dteliukov.security.SecurityPasswordUtil;
 import org.junit.jupiter.api.*;
 
 import java.util.Objects;
@@ -17,12 +18,14 @@ class UserMongoDBDaoTest {
     private static UserDao dao;
     private static User prototypeUser;
 
+    private static final String password = "user";
+
     @BeforeAll
     static void setUpUserDaoTest() {
         DaoRepository repository = DaoFactory.getRepository(TypeDao.MONGODB);
         dao = Objects.requireNonNull(repository).getUserDao();
         prototypeUser = new User("testLastname", "testFirstname",
-                "teststudent@gmail", "user", Role.STUDENT);
+                "teststudent@gmail", SecurityPasswordUtil.getSecuredPassword(password), Role.STUDENT);
 
         dao.registerUser(prototypeUser);
     }
@@ -41,7 +44,7 @@ class UserMongoDBDaoTest {
     @DisplayName("Success login")
     void login() {
         var authorizedUser =
-                dao.login(new UnauthorizedUser(prototypeUser.getEmail(), prototypeUser.getPassword()));
+                dao.login(new UnauthorizedUser(prototypeUser.getEmail(), password));
 
         assertTrue(authorizedUser.isPresent());
     }

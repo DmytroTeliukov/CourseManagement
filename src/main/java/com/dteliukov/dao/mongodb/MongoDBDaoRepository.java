@@ -5,7 +5,7 @@ import com.dteliukov.dao.*;
 public class MongoDBDaoRepository extends DaoRepository {
     @Override
     public AnswerDao getAnswerDao() {
-        return null;
+        return new AnswerMongoDBDao();
     }
 
     @Override

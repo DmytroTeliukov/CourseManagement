@@ -51,7 +51,7 @@ public class AnswerMySqlDao implements AnswerDao {
             long statusId = getAnswerStatusId(answer.getStatus().name(), connection);
             try(PreparedStatement preparedStatement = connection.prepareStatement(editAnswerScript)) {
                 preparedStatement.setString(1, answer.getFilePath());
-                preparedStatement.setLong(2, answer.getMark());
+                preparedStatement.setObject(2, answer.getMark(), Types.INTEGER);
                 preparedStatement.setString(3, answer.getECTSMark());
                 preparedStatement.setString(4, answer.getChecked());
                 preparedStatement.setString(5, answer.getComment());

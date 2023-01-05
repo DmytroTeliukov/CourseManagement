@@ -9,6 +9,7 @@ import com.dteliukov.model.User;
 import com.dteliukov.security.SecurityPasswordUtil;
 import com.google.gson.Gson;
 import com.mongodb.client.FindIterable;
+import com.mongodb.MongoClient;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -30,7 +31,7 @@ public class UserMongoDBDao implements UserDao {
     }
     @Override
     public Optional<AuthorizedUser> login(UnauthorizedUser user) {
-        try (var connection = MongoDBConnection.getConnection()) {
+        try (MongoClient connection = MongoDBConnection.getConnection()) {
             FindIterable<Document> filter = connection
                     .getDatabase(MongoDBConnection.dbName)
                     .getCollection(Collections.users)
@@ -56,24 +57,24 @@ public class UserMongoDBDao implements UserDao {
 
     @Override
     public void registerUser(User user) {
-        try (var connection = MongoDBConnection.getConnection()) {
+        MongoClient connection = MongoDBConnection.getConnection();
             var usersCollection = connection
                     .getDatabase(MongoDBConnection.dbName).getCollection(Collections.users);
             Document newUser = new Document();
             newUser.append(Columns.lastname, user.getLastname())
                     .append(Columns.firstname, user.getFirstname())
                     .append(Columns.email, user.getEmail())
-                    .append(Columns.password, SecurityPasswordUtil.getSecuredPassword(user.getPassword()))
+                    .append(Columns.password, user.getPassword())
                     .append(Columns.role, user.getRole().name());
             usersCollection.insertOne(newUser);
-            logger.info("User inserted into database: " + user);
-        }
+            //logger.info("User inserted into database: " + user);
+
 
     }
 
     @Override
     public void editUser(User user) {
-        try (var connection = MongoDBConnection.getConnection()) {
+        try (MongoClient connection = MongoDBConnection.getConnection()) {
             var collection = connection.getDatabase(MongoDBConnection.dbName)
                     .getCollection(Collections.users);
             Bson filter = eq(Columns.email, user.getEmail());
@@ -89,7 +90,7 @@ public class UserMongoDBDao implements UserDao {
 
     @Override
     public void deleteUser(String email) {
-        try (var connection = MongoDBConnection.getConnection()) {
+        try (MongoClient connection = MongoDBConnection.getConnection()) {
             var collection = connection.getDatabase(MongoDBConnection.dbName)
                     .getCollection(Collections.users);
             Bson filter = eq(Columns.email, email);
@@ -101,29 +102,28 @@ public class UserMongoDBDao implements UserDao {
     @Override
     public Collection<User> retrieveUsers() {
         Collection<User> users = new LinkedList<>();
-        try (var connection = MongoDBConnection.getConnection()) {
+        MongoClient connection = MongoDBConnection.getConnection();
             var collection = connection
                     .getDatabase(MongoDBConnection.dbName)
                     .getCollection(Collections.users).find();
             try (var cursor = collection.cursor()) {
-                if (cursor.hasNext()) {
+                while (cursor.hasNext()) {
                     var user = gson.fromJson(cursor.next().toJson(), User.class);
                     logger.info("Get user: " + user);
                     users.add(user);
                 }
                 logger.info("Get users from mongodb database!");
             }
-        }
+
         return users;
     }
 
     @Override
     public Optional<User> getUserByEmail(String email) {
-        try (var connection = MongoDBConnection.getConnection()) {
+        try (MongoClient connection = MongoDBConnection.getConnection()) {
             FindIterable<Document> filter = connection
                     .getDatabase(MongoDBConnection.dbName)
-                    .getCollection(Collections.users)
-                    .find(new Document(Columns.email, email));
+                    .getCollection(Collections.users).find(new Document(Columns.email, email));
             try (var cursor = filter.cursor()) {
                 if (cursor.hasNext()) {
                     var user = gson.fromJson(cursor.next().toJson(), User.class);

@@ -7,7 +7,10 @@ public class MongoDBConnection {
     private static final int port = 27017;
     public static final String dbName = "course_database";
 
+    private static MongoClient connection = null;
     public static MongoClient getConnection() {
-        return new MongoClient(host, port);
+        if (connection == null)
+            connection = new MongoClient(host, port);
+        return connection;
     }
 }

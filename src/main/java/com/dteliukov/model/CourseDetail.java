@@ -1,11 +1,16 @@
 package com.dteliukov.model;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 public class CourseDetail {
     private Course course;
+    @SerializedName(value = "materials")
     private List<Material> materials;
+    @SerializedName(value = "tasks")
     private List<Task> tasks;
 
     public CourseDetail() {}
@@ -39,6 +44,22 @@ public class CourseDetail {
 
     public CourseDetail tasks(List<Task> tasks) {
         this.tasks = tasks;
+        return this;
+    }
+
+    public CourseDetail addMaterial(Material material) {
+        if (materials == null) {
+            materials = new LinkedList<>();
+        }
+        materials.add(material);
+        return this;
+    }
+
+    public CourseDetail addTask(Task task) {
+        if (tasks == null) {
+            tasks = new LinkedList<>();
+        }
+        tasks.add(task);
         return this;
     }
 

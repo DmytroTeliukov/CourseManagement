@@ -51,6 +51,50 @@ class CourseMongoDBDaoTest {
     }
 
     @Test
+    @Order(1)
+    @DisplayName("Get course by name successfully")
+    void getCourseByNameSuccessfully() {
+        var course = courseDao.getByName("testCourse");
+
+        assertTrue(course.isPresent());
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("Fail getting course by name")
+    void failGettingCourseByName() {
+        var course = courseDao.getByName("testWrongCourse");
+
+        assertTrue(course.isEmpty());
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("Add material to course")
+    void addMaterialToCourse() {
+        courseDao.addMaterial(prototypeMaterial, courseId);
+        var getCourseMaterials = courseDao.getDetail(courseId).get().getMaterials();
+        materialId = getCourseMaterials.stream()
+                .filter(material -> material.equals(prototypeMaterial))
+                .findFirst().get().getId();
+
+        assertTrue(getCourseMaterials.contains(prototypeMaterial));
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("Add task to course")
+    void addTaskToCourse() {
+        courseDao.addTask(prototypeTask, courseId);
+        var getCourseTasks = courseDao.getDetail(courseId).get().getTasks();
+        taskId = getCourseTasks.stream()
+                .filter(task -> task.equals(prototypeTask))
+                .findFirst().get().getId();
+
+        assertTrue(getCourseTasks.contains(prototypeTask));
+    }
+
+    @Test
     @Order(5)
     @DisplayName("Retrieve students from course successfully")
     void retrieveStudentFromCourseSuccessfully() {
@@ -68,14 +112,70 @@ class CourseMongoDBDaoTest {
         assertFalse(courses.isEmpty());
     }
 
-    @AfterAll
-    static void deletePrototypes() {
-        courseDao.removeStudent(prototypeStudent.getEmail(), courseId);
-        courseDao.deleteCourse(courseDao.getByName(prototypeCourse.getName()).get().getId());
-        userDao.deleteUser(prototypeStudent.getEmail());
-        userDao.deleteUser(prototypeTeacher.getEmail());
+    @Test
+    @Order(7)
+    @DisplayName("Retrieve course detail successfully")
+    void retrieveCourseDetailSuccessfully() {
+        var courses = courseDao.getDetail(courseId);
+
+        assertFalse(courses.isEmpty());
     }
 
+    @Test
+    @Order(8)
+    @DisplayName("Fail retrieving course detail")
+    void failRetrievingCourseDetail() {
+        var courses = courseDao.getDetail(Long.MAX_VALUE);
 
+        assertTrue(courses.isEmpty());
+    }
 
+    @Test
+    @Order(9)
+    @DisplayName("Edit name of course")
+    void editNameCourse() {
+        var course = courseDao.getByName(prototypeCourse.getName());
+        var editedCourse = course.get().name(editedCourseName);
+        courseDao.editCourse(editedCourse);
+        var updatedCourse = courseDao.getByName(editedCourseName);
+        courseDao.editCourse(prototypeCourse.id(editedCourse.getId()));
+
+        assertEquals(editedCourse, updatedCourse.get());
+    }
+
+    @Test
+    @Order(10)
+    @DisplayName("Edit task on course")
+    void editTaskOnCourse() {
+        var course = courseDao.getDetail(courseId);
+        var editedTask = course.get().getTasks().stream()
+                .filter(task -> task.equals(prototypeTask))
+                .findFirst().get().theme("updatedTheme");
+        courseDao.editTask(editedTask);
+        var updatedTask = courseDao.getDetail(courseId).get()
+                .getTasks().stream()
+                .filter(task -> task.getId().equals(taskId))
+                .findFirst().get();
+
+        assertEquals(editedTask, updatedTask);
+    }
+
+    @Test
+    @Order(11)
+    @DisplayName("Retrieve courses of student")
+    void retrieveCoursesStudent() {
+        var courses = courseDao.retrieveCoursesByStudentEmail(prototypeStudent.getEmail());
+
+        assertFalse(courses.isEmpty());
+    }
+
+    @AfterAll
+    static void deletePrototypes() {
+        courseDao.deleteMaterial(materialId);
+        courseDao.deleteTask(taskId);
+        courseDao.removeStudent(prototypeStudent.getEmail(), courseId);
+        courseDao.deleteCourse(courseDao.getByName(prototypeCourse.getName()).get().getId());
+        userDao.deleteUser(prototypeTeacher.getEmail());
+        userDao.deleteUser(prototypeStudent.getEmail());
+    }
 }

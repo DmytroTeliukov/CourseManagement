@@ -2,18 +2,28 @@ package com.dteliukov.model;
 
 import com.dteliukov.enums.AnswerStatus;
 import com.dteliukov.review.AnswerRecord;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
 
 public class Answer {
+    @SerializedName("answer_id")
     private Long id;
+    @SerializedName("student")
     private User student;
+    @SerializedName("sent")
     private String sent;
+    @SerializedName("checked")
     private String checked;
+    @SerializedName("comment")
     private String comment;
+    @SerializedName("path")
     private String filePath;
+    @SerializedName("mark")
     private Integer mark;
+    @SerializedName("ects_mark")
     private String ECTSMark;
+    @SerializedName("status")
     private AnswerStatus status;
 
     public Answer() {}

@@ -1,7 +1,6 @@
 package com.dteliukov.dao;
 
 import com.dteliukov.model.Answer;
-import com.dteliukov.model.Task;
 
 import java.util.Collection;
 import java.util.Optional;

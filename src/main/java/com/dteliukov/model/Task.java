@@ -1,14 +1,20 @@
 package com.dteliukov.model;
 
 import com.dteliukov.notification.CourseItem;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
 
 public class Task extends CourseItem {
+    @SerializedName("task_id")
     private Long id;
+    @SerializedName("theme")
     private String theme;
+    @SerializedName("description")
     private String description;
+    @SerializedName("created")
     private String created;
+    @SerializedName("deadline")
     private String deadline;
 
     public Task() {}

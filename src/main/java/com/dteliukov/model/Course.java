@@ -1,7 +1,6 @@
 package com.dteliukov.model;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
